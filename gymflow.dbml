@@ -1,0 +1,128 @@
+// GymFlow — модель для dbdiagram.io
+// Вставь всё содержимое на https://dbdiagram.io -> получишь диаграмму + экспорт в PNG/PDF/SQL.
+
+Table club {
+  club_id int [pk, increment]
+  name varchar
+  city varchar
+  address varchar
+  phone varchar
+  opens_at time
+  closes_at time
+}
+
+Table member {
+  member_id int [pk, increment]
+  full_name varchar
+  phone varchar [unique, not null]
+  email varchar [unique]
+  birth_date date
+  registered_at timestamp
+}
+
+Table membership_plan {
+  plan_id int [pk, increment]
+  name varchar
+  duration_days int
+  price decimal
+  class_limit int [note: 'NULL = безлимит']
+  is_active boolean
+}
+
+Table membership {
+  membership_id int [pk, increment]
+  member_id int [not null]
+  plan_id int [not null]
+  start_date date
+  end_date date
+  status varchar
+}
+
+Table trainer {
+  trainer_id int [pk, increment]
+  full_name varchar
+  phone varchar
+  hired_at date
+}
+
+Table specialization {
+  specialization_id int [pk, increment]
+  name varchar [unique]
+}
+
+Table trainer_specialization {
+  trainer_id int [pk]
+  specialization_id int [pk]
+}
+
+Table trainer_club {
+  trainer_id int [pk]
+  club_id int [pk]
+}
+
+Table class_type {
+  class_type_id int [pk, increment]
+  name varchar
+  default_duration_min int
+  specialization_id int
+}
+
+Table class_session {
+  session_id int [pk, increment]
+  class_type_id int [not null]
+  club_id int [not null]
+  trainer_id int [not null]
+  start_at timestamp
+  duration_min int
+  capacity int
+  status varchar
+}
+
+Table booking {
+  booking_id int [pk, increment]
+  session_id int [not null]
+  member_id int [not null]
+  status varchar
+  created_at timestamp
+  indexes {
+    (session_id, member_id) [unique]
+  }
+}
+
+Table payment {
+  payment_id int [pk, increment]
+  member_id int [not null]
+  membership_id int
+  amount decimal
+  paid_at timestamp
+  method varchar
+}
+
+Table review {
+  review_id int [pk, increment]
+  member_id int [not null]
+  session_id int [not null]
+  rating int
+  comment text
+  created_at timestamp
+  indexes {
+    (member_id, session_id) [unique]
+  }
+}
+
+Ref: membership.member_id > member.member_id
+Ref: membership.plan_id > membership_plan.plan_id
+Ref: trainer_specialization.trainer_id > trainer.trainer_id
+Ref: trainer_specialization.specialization_id > specialization.specialization_id
+Ref: trainer_club.trainer_id > trainer.trainer_id
+Ref: trainer_club.club_id > club.club_id
+Ref: class_type.specialization_id > specialization.specialization_id
+Ref: class_session.class_type_id > class_type.class_type_id
+Ref: class_session.club_id > club.club_id
+Ref: class_session.trainer_id > trainer.trainer_id
+Ref: booking.session_id > class_session.session_id
+Ref: booking.member_id > member.member_id
+Ref: payment.member_id > member.member_id
+Ref: payment.membership_id > membership.membership_id
+Ref: review.member_id > member.member_id
+Ref: review.session_id > class_session.session_id
